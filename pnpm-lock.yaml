@@ -53,9 +53,15 @@ catalogs:
     '@nuxt/ui-pro':
       specifier: ^3.3.4
       version: 3.3.4
+    '@sidebase/nuxt-auth':
+      specifier: 1.0.2
+      version: 1.0.2
     '@vueuse/core':
       specifier: ^13.9.0
       version: 13.9.0
+    next-auth:
+      specifier: ~4.21.1
+      version: 4.21.1
     pinia:
       specifier: ^3.0.3
       version: 3.0.3
@@ -116,7 +122,7 @@ importers:
         specifier: catalog:build
         version: 0.11.2(magicast@0.3.5)(pinia@3.0.3(typescript@5.9.2)(vue@3.5.21(typescript@5.9.2)))
       '@sidebase/nuxt-auth':
-        specifier: 1.0.2
+        specifier: catalog:frontend
         version: 1.0.2(magicast@0.3.5)(next-auth@4.21.1)
       '@vite-pwa/nuxt':
         specifier: catalog:build
@@ -140,7 +146,7 @@ importers:
         specifier: catalog:dev
         version: 16.2.0
       next-auth:
-        specifier: ~4.21.1
+        specifier: catalog:frontend
         version: 4.21.1
       nuxt:
         specifier: ^4.1.2

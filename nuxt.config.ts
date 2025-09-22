@@ -35,6 +35,12 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
+  runtimeConfig: {
+    authSecret: '',
+    authAdminUsername: '',
+    authAdminPassword: '',
+  },
+
   future: {
     compatibilityVersion: 4,
   },
@@ -58,6 +64,29 @@ export default defineNuxtConfig({
     prerender: {
       crawlLinks: false,
       routes: ['/'],
+    },
+  },
+
+  auth: {
+    baseURL: '/api/auth',
+    globalAppMiddleware: true,
+    provider: {
+      type: 'local',
+      endpoints: {
+        signIn: { path: '/login', method: 'post' },
+        signOut: { path: '/logout', method: 'post' },
+        getSession: { path: '/session', method: 'get' },
+      },
+      pages: {
+        login: '/login',
+      },
+      token: {
+        signInResponseTokenPointer: '/token',
+        type: 'Bearer',
+        headerName: 'Authorization',
+        maxAgeInSeconds: 60 * 60 * 24, // 24 hours
+        sameSiteAttribute: 'lax',
+      },
     },
   },
 
