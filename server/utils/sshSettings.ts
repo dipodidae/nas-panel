@@ -2,9 +2,30 @@ import type { SshSettingsInternal, SshSettingsPublic } from '@@/types/ssh'
 import { generateKeyPairSync } from 'node:crypto'
 import { encryptPrivateKey } from './sshCrypto'
 
+// Centralized helper to obtain a Nitro database connection. We first try the implicit
+// default connection (configured under the `default` key in `nuxt.config.ts`). If that
+// throws because the project still has an older config (e.g. connection keyed as 'app'
+// while code expects implicit default), we fall back to a named 'app' connection.
+// This makes the code resilient across the rename without requiring a coordinated
+// restart order in dev.
+function getDb() {
+  try {
+    return useDatabase()
+  }
+  catch (e1) {
+    try {
+      return useDatabase('app')
+    }
+    catch {
+      // Surface the original error to keep messaging consistent.
+      throw e1
+    }
+  }
+}
+
 // Table DDL (executed lazily). We keep a single-row table keyed by id='singleton'.
 async function ensureTable() {
-  const db = useDatabase()
+  const db = getDb()
   await db.sql`CREATE TABLE IF NOT EXISTS ssh_settings (
     id TEXT PRIMARY KEY,
     host TEXT,
@@ -19,7 +40,7 @@ async function ensureTable() {
 
 async function loadRow(): Promise<SshSettingsInternal> {
   await ensureTable()
-  const db = useDatabase()
+  const db = getDb()
   const result = await db.sql`SELECT * FROM ssh_settings WHERE id='singleton' LIMIT 1`
   const rows: any[] = (result as any)?.rows || []
   if (rows.length === 0)
@@ -55,7 +76,7 @@ async function saveRow(partial: Partial<SshSettingsInternal>) {
   await ensureTable()
   const existing = await loadRow()
   const merged = mergeSettings(existing, partial)
-  const db = useDatabase()
+  const db = getDb()
   await db.sql`INSERT INTO ssh_settings (id, host, username, encryptedPrivateKey, publicKey, algorithm, createdAt, updatedAt)
     VALUES ('singleton', ${merged.host}, ${merged.username}, ${merged.encryptedPrivateKey}, ${merged.publicKey}, ${merged.algorithm}, ${merged.createdAt}, ${merged.updatedAt})
     ON CONFLICT(id) DO UPDATE SET host=excluded.host, username=excluded.username, encryptedPrivateKey=excluded.encryptedPrivateKey, publicKey=excluded.publicKey, algorithm=excluded.algorithm, createdAt=excluded.createdAt, updatedAt=excluded.updatedAt`

@@ -9,10 +9,6 @@ export default defineAppConfig({
       { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
       { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
       { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
-      {
-        rel: 'stylesheet',
-        href: 'https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap',
-      },
     ],
     meta: [
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
@@ -36,6 +32,13 @@ export default defineAppConfig({
     button: {
       slots: {
         base: 'font-medium',
+      },
+    },
+    input: {
+      variants: {
+        variant: {
+          outline: 'text-highlighted bg-white dark:bg-neutral-950 ring ring-inset ring-accented',
+        },
       },
     },
   },

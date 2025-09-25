@@ -62,10 +62,12 @@ export default defineNuxtConfig({
     // built during the very first dev requests (a race in dev startup), not an actual
     // conflict with Nitro's DB. Using a named connection ('app') for clarity.
     experimental: { database: true },
+    // Rename connection key to `default` so bare useDatabase() resolves correctly.
+    // Keeping the underlying file name 'app' for continuity; change to 'default' if you prefer a new file.
     database: {
-      app: {
+      default: {
         connector: 'sqlite',
-        options: { name: 'app' }, // => .data/app.sqlite3
+        options: { name: 'app' }, // => .data/app.sqlite3 (logical DB name remains 'app')
       },
     },
   },

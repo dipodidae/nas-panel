@@ -50,7 +50,7 @@ function extractErrorMessage(err: any): string {
 }
 
 // useAsyncData with manual execution: no request until user submits
-const { data: loginResponse, error: loginFetchError, status, execute, clear } = await useAsyncData(
+const { error: loginFetchError, status, execute, clear } = await useAsyncData(
   'auth-login',
   async () => {
     if (!pendingCredentials)
@@ -59,21 +59,10 @@ const { data: loginResponse, error: loginFetchError, status, execute, clear } = 
     return await signIn({
       username: pendingCredentials.username,
       password: pendingCredentials.password,
-    }, { callbackUrl: '/', redirect: false })
+    }, { callbackUrl: '/', redirect: true })
   },
   { immediate: false },
 )
-
-const loading = computed(() => status.value === 'pending')
-const loginErrorMessage = computed(() => loginFetchError.value ? extractErrorMessage(loginFetchError.value) : null)
-
-// Redirect when successful
-watchEffect(async () => {
-  if (status.value === 'success' && loginResponse.value && !loginFetchError.value) {
-    const url = (loginResponse.value as any)?.url || '/'
-    await navigateTo(url)
-  }
-})
 
 async function login(payload: FormSubmitEvent<Schema>) {
   // Reset previous state
@@ -90,17 +79,16 @@ async function login(payload: FormSubmitEvent<Schema>) {
   <UAuthForm
     :fields="fields"
     :schema="schema"
-    :loading="loading"
-    title="Login"
-    description="Enter your credentials to access your account."
+    :loading="status === 'pending'"
+    :disabled="status === 'pending'"
     @submit="login"
   >
     <template #validation>
       <UAlert
-        v-if="loginErrorMessage"
+        v-if="loginFetchError"
         color="error"
         icon="i-lucide-info"
-        :title="loginErrorMessage"
+        :title="extractErrorMessage(loginFetchError)"
       />
     </template>
   </UAuthForm>

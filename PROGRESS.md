@@ -25,6 +25,10 @@ Date: 2025-09-25
 - Store exposes `markExited` to archive results.
 - UI renders recent history list.
 
+### UI Polish (Loading Indicator)
+
+- Replaced default `<NuxtLoadingIndicator>` with custom `<AppLoadingIndicator>` using Tailwind + project CSS vars (gradient aligns with semantic `--ui-*` colors, Nuxt page lifecycle hooks, throttle/hide/reset timings configurable). Exposes manual control via DOM events & component expose.
+
 ### Enhancements (Third Pass - Reliability & Force Kill)
 
 - Force kill (SIGKILL) support via `DELETE /api/commands/:id?force=1` and `forceKillCommand`.
