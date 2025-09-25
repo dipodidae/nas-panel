@@ -1,10 +1,9 @@
 <script setup lang="ts">
-const { data: session, status, signOut } = useAuth()
+// explicit import for clarity
+import { useUserDisplayName } from '../../composables/useUserDisplayName'
 
-const displayName = computed(() => {
-  const s = session.value as any
-  return s?.name || s?.username || 'User'
-})
+const { status, signOut } = useAuth()
+const { displayName } = useUserDisplayName()
 
 async function logout() {
   await signOut({ callbackUrl: '/login' })

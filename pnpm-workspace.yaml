@@ -1,5 +1,7 @@
-packages: []
+packages:
+  - .
 
+catalog: {}
 catalogs:
   build:
     '@commitlint/cli': ^19.8.1

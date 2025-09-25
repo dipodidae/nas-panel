@@ -9,10 +9,5 @@ definePageMeta({
 </script>
 
 <template>
-  <div>
-    <div class="mb-4 text-center">
-      <h2>Sign in to your account</h2>
-    </div>
-    <LoginForm />
-  </div>
+  <LoginForm />
 </template>
