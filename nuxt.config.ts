@@ -57,13 +57,15 @@ export default defineNuxtConfig({
       crawlLinks: false,
       routes: ['/'],
     },
-    experimental: {
-      database: true,
-    },
+    // Re-enabled Nitro database. Earlier disable was a temporary diagnostic step; the
+    // `_content_content` error stems from @nuxt/content's collection table not yet being
+    // built during the very first dev requests (a race in dev startup), not an actual
+    // conflict with Nitro's DB. Using a named connection ('app') for clarity.
+    experimental: { database: true },
     database: {
-      default: {
+      app: {
         connector: 'sqlite',
-        options: { name: 'db' }, // stored at .data/db.sqlite3
+        options: { name: 'app' }, // => .data/app.sqlite3
       },
     },
   },
