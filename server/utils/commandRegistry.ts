@@ -1,10 +1,10 @@
-import type { CommandDefinition, SerializedCommandInstance, WhitelistedCommandConfig } from './commandTypes'
+// Uses global types from /types (CommandDefinition, SerializedCommandInstance, WhitelistedCommandConfig)
 import { spawn } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import { EventEmitter } from 'node:events'
 import { join } from 'node:path'
 import process from 'node:process'
-import { COMMAND_META } from '../../shared/commandCatalog'
+import { COMMAND_META } from '#shared/commandCatalog'
 import { COMMAND_BUFFER_MAX_LINES, COMMAND_ENV_HOME_FALLBACK } from './commandConstants'
 
 // Whitelisted commands (execution mapping). Keep in sync with front-end catalog but do NOT expose
@@ -29,6 +29,23 @@ export function listCommands(): string[] {
 
 export function getCommand(id: string): CommandDefinition | undefined {
   return instances.get(id)
+}
+
+export function cancelCommand(id: string): boolean {
+  const inst = instances.get(id)
+  if (!inst)
+    return false
+  if (inst.status !== 'running' || !inst.proc)
+    return false
+  try {
+    inst.proc.kill('SIGTERM')
+    recordProcessOutput(inst, 'meta', 'CANCEL REQUESTED')
+    return true
+  }
+  catch (e: any) {
+    recordProcessOutput(inst, 'meta', `CANCEL ERROR: ${e.message}`)
+    return false
+  }
 }
 
 export function startCommand(key: string): CommandDefinition {
@@ -92,4 +109,4 @@ export function serializeInstance(inst: CommandDefinition): SerializedCommandIns
   }
 }
 
-// Future: add cancelCommand(id) to gracefully terminate running processes.
+// cancelCommand implemented above (SIGTERM); could add SIGKILL fallback after timeout.

@@ -1,6 +1,7 @@
-import { requireAuth } from '../../utils/auth'
-import { COMMAND_WS_BASE_PATH } from '../../utils/commandConstants'
-import { serializeInstance, startCommand } from '../../utils/commandRegistry'
+import type { StartCommandResponse } from '@@/types/api'
+import { requireAuth } from '@@/server/utils/auth'
+import { COMMAND_WS_BASE_PATH } from '@@/server/utils/commandConstants'
+import { serializeInstance, startCommand } from '@@/server/utils/commandRegistry'
 
 export default defineEventHandler(async (event) => {
   // Ensure authenticated (throws if invalid)
@@ -14,11 +15,12 @@ export default defineEventHandler(async (event) => {
   try {
     const instance = startCommand(command)
     const wsPath = `${COMMAND_WS_BASE_PATH}/${instance.id}`
-    return {
+    const payload: StartCommandResponse = {
       ok: true,
       command: serializeInstance(instance),
       wsPath,
     }
+    return payload
   }
   catch (err: any) {
     throw createError({ statusCode: 400, statusMessage: err.message || 'Failed to start command' })

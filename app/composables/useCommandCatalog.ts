@@ -1,6 +1,4 @@
-import type { CommandMeta } from '../shared/commandCatalog'
-import { $fetch } from 'ofetch'
-import { reactive, toRefs } from 'vue'
+// Types (ListCommandsResponse, CommandMeta) are globally available
 
 interface CommandCatalogState {
   loaded: boolean
@@ -19,7 +17,7 @@ export function useCommandCatalog() {
     if (state.loaded && !force)
       return
     try {
-      const resp = await $fetch<{ ok: boolean, commands: CommandMeta[] }>('/api/commands')
+  const resp = await $fetch<ListCommandsResponse>('/api/commands')
       if (resp.ok) {
         state.commands = resp.commands
         state.loaded = true

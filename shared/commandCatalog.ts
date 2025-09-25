@@ -1,12 +1,5 @@
 // Shared SSR-safe command catalog: front-end consumes UI metadata; back-end validates keys.
-// Do NOT put sensitive execution details here beyond what you are comfortable exposing to clients.
-export interface CommandMeta {
-  key: string
-  label: string
-  icon?: string
-  confirm?: boolean
-  description?: string
-}
+// Types auto-imported globally from /types
 
 export const COMMAND_META: CommandMeta[] = [
   {

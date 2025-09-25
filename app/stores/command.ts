@@ -1,22 +1,12 @@
 import { defineStore } from 'pinia'
 
-interface CommandState {
-  // The command key most recently requested to start (drives Terminal)
-  commandKey: string | null
-  // The server-assigned id for the currently active command session
-  activeCommandId: string | null
-  // Last error message (start failures etc.)
-  lastError: string | null
-  // Per-command pending (starting) flags
-  pending: Record<string, boolean>
-}
-
 export const useCommandStore = defineStore('command', {
   state: (): CommandState => ({
     commandKey: null,
     activeCommandId: null,
     lastError: null,
     pending: {},
+    history: [],
   }),
   getters: {
     isStarting: state => (key: string | null | undefined): boolean => {
@@ -38,6 +28,15 @@ export const useCommandStore = defineStore('command', {
       if (this.commandKey) {
         delete this.pending[this.commandKey]
       }
+    },
+    markExited(exitCode: number | null) {
+      if (this.activeCommandId && this.commandKey) {
+        this.history.unshift({ id: this.activeCommandId, key: this.commandKey, exitCode, at: Date.now() })
+        if (this.history.length > 25)
+          this.history.splice(25)
+      }
+      this.activeCommandId = null
+      this.commandKey = null
     },
     setError(message: string) {
       this.lastError = message

@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { useCommandStore } from '@/stores/command'
-
 const props = withDefaults(defineProps<{
   command: string
   label?: string

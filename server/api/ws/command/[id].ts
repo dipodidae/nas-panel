@@ -1,9 +1,10 @@
-import { getCommand } from '../../../utils/commandRegistry'
+import { requireAuth } from '@@/server/utils/auth'
+import { getCommand } from '@@/server/utils/commandRegistry'
 
 // WebSocket endpoint: /api/ws/command/:id
+// Normalized: ALL messages are raw serialized line objects { t, kind, data }
 export default defineWebSocketHandler({
   open(peer) {
-  // Nitro's Peer object might not expose route params in type context; parse from URL
     const rawUrl = (peer as any).url || ''
     const parts = rawUrl.split('/')
     const id = parts[parts.length - 1]
@@ -11,25 +12,28 @@ export default defineWebSocketHandler({
       peer.close(1008, 'Missing command id')
       return
     }
+    try {
+      requireAuth((peer as any).ctx?.event || ({} as any))
+    }
+    catch {
+      peer.close(1008, 'Unauthorized')
+      return
+    }
+
     const instance = getCommand(id)
     if (!instance) {
       peer.close(1008, 'Unknown command id')
       return
     }
 
-    // Send existing buffered lines first
     for (const line of instance.buffer) {
       peer.send(line)
     }
 
-    // Listener for new data
     const onData = (line: string) => {
-      // Namespacing: wrap output with command id
-      peer.send(JSON.stringify({ id: instance.id, line }))
+      peer.send(line)
     }
     instance.emitter.on('data', onData)
-
-    // Store unsubscribe on peer
     ;(peer as any)._off = () => instance.emitter.off('data', onData)
   },
   close(peer) {
@@ -37,6 +41,6 @@ export default defineWebSocketHandler({
       (peer as any)._off()
   },
   message() {
-    // Read-only channel for now; ignore messages.
+    // Read-only channel for now
   },
 })

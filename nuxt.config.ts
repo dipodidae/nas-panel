@@ -11,6 +11,11 @@ export default defineNuxtConfig({
     '@sidebase/nuxt-auth',
   ],
 
+  imports: {
+    // Ensure all files under /types are scanned for type auto import side-effects
+    dirs: ['types'],
+  },
+
   devtools: {
     enabled: true,
   },
@@ -39,6 +44,10 @@ export default defineNuxtConfig({
     authSecret: '',
     authAdminUsername: '',
     authAdminPassword: '',
+  },
+
+  alias: {
+    '@/types': './types',
   },
 
   future: {

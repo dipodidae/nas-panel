@@ -1,7 +1,4 @@
 <script setup lang="ts">
-// explicit import for clarity
-import { useUserDisplayName } from '../../composables/useUserDisplayName'
-
 const { status, signOut } = useAuth()
 const { displayName } = useUserDisplayName()
 
