@@ -1,7 +1,11 @@
+catalog:
+  better-sqlite3: ^12.4.1
+
 catalogs:
   build:
     '@commitlint/cli': ^19.8.1
     '@commitlint/config-conventional': ^19.8.1
+    '@nuxt/content': ^3.0.0
     '@nuxt/devtools': ^2.6.3
     '@nuxt/eslint': ^1.9.0
     '@nuxt/kit': ^4.0.0
@@ -36,6 +40,7 @@ catalogs:
 onlyBuiltDependencies:
   - '@parcel/watcher'
   - '@tailwindcss/oxide'
+  - better-sqlite3
   - cpu-features
   - esbuild
   - simple-git-hooks

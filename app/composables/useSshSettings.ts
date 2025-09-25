@@ -10,6 +10,9 @@ interface SshSettingsState {
   hasKey: boolean
   lastTest?: { success: boolean, message: string, latencyMs?: number }
   error: string | null
+  // Derived connection health snapshot (updated on successful test)
+  connected: boolean
+  lastHealthyAt?: number
 }
 
 const sshState = reactive<SshSettingsState>({
@@ -22,6 +25,7 @@ const sshState = reactive<SshSettingsState>({
   publicKey: null,
   hasKey: false,
   error: null,
+  connected: false,
 })
 
 export function useSshSettings() {
@@ -61,6 +65,9 @@ export function useSshSettings() {
       sshState.publicKey = s.publicKey
       sshState.hasKey = s.hasKey
       sshState.error = null
+      // If we have all required pieces and previously healthy state, keep it; otherwise stay false until test.
+      if (!sshState.connected)
+        sshState.connected = false
     }
     catch (e: any) {
       setError(e?.message || 'Failed to load settings')
@@ -114,9 +121,12 @@ export function useSshSettings() {
         sshState.lastTest = { success: resp.success, message: resp.message, latencyMs: resp.latencyMs }
         if (resp.success) {
           handleSuccessToast('SSH connection OK', 'i-lucide-plug', resp.message || (resp.latencyMs ? `${resp.latencyMs} ms` : undefined))
+          sshState.connected = true
+          sshState.lastHealthyAt = Date.now()
         }
         else {
           toast.add({ title: 'SSH connection failed', description: resp.message, color: 'error', icon: 'i-lucide-plug-zap' })
+          sshState.connected = false
         }
       }
     }

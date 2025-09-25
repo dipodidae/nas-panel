@@ -7,6 +7,7 @@ export default defineNuxtConfig({
     '@vite-pwa/nuxt',
     '@nuxt/eslint',
     '@nuxt/ui',
+    '@nuxt/content',
     '@sidebase/nuxt-auth',
   ],
 

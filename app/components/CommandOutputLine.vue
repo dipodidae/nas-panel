@@ -12,9 +12,9 @@ const props = defineProps<{ line: OutputLine }>()
   <div
     class="break-all whitespace-pre"
     :class="{
-      'text-neutral-300': props.line.kind === 'stdout',
-      'text-red-400': props.line.kind === 'stderr',
-      'text-blue-400': props.line.kind === 'meta',
+      'text-neutral': props.line.kind === 'stdout',
+      'text-errpr': props.line.kind === 'stderr',
+      'text-succes': props.line.kind === 'meta',
     }"
   >
     {{ props.line.text }}

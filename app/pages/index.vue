@@ -2,6 +2,7 @@
 const commandStore = useCommandStore()
 const { commands, load, error } = useCommandCatalog()
 await load()
+useHead({ title: 'Home' })
 </script>
 
 <template>

@@ -5,10 +5,10 @@ const { lastTest, error } = useSshSettings()
 
 <template>
   <div class="space-y-2">
-    <div v-if="lastTest" class="text-sm" :class="lastTest.success ? 'text-green-600' : 'text-red-600'">
+    <div v-if="lastTest" class="text-sm" :class="lastTest.success ? 'text-success' : 'text-error'">
       Test: {{ lastTest.message }}<span v-if="lastTest?.latencyMs"> ({{ lastTest?.latencyMs }} ms)</span>
     </div>
-    <div v-if="error" class="text-sm text-red-600">
+    <div v-if="error" class="text-error text-sm">
       {{ error }}
     </div>
   </div>

@@ -22,6 +22,13 @@
 
 /* Light mode semantic variables */
 :root {
+  --ui-primary: var(--ui-color-primary-800);
+  --ui-secondary: var(--ui-color-secondary-800);
+  --ui-success: var(--ui-color-success-600);
+  --ui-info: var(--ui-color-info-600);
+  --ui-warning: var(--ui-color-warning-600);
+  --ui-error: var(--ui-color-error-600);
+
   --ui-bg: var(--color-neutral-50);
   --ui-bg-muted: var(--ui-color-neutral-50);
   --ui-bg-elevated: var(--ui-color-neutral-100);
@@ -39,6 +46,13 @@
 
 /* Dark mode semantic variables */
 .dark {
+  --ui-primary: var(--ui-color-primary-200);
+  --ui-secondary: var(--ui-color-secondary-200);
+  --ui-success: var(--ui-color-success-300);
+  --ui-info: var(--ui-color-info-300);
+  --ui-warning: var(--ui-color-warning-300);
+  --ui-error: var(--ui-color-error-300);
+
   --ui-bg: var(--ui-color-neutral-950);
   --ui-bg-muted: var(--ui-color-neutral-800);
   --ui-bg-elevated: var(--ui-color-neutral-800);

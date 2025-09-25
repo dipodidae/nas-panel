@@ -2,6 +2,11 @@
 definePageMeta({
   middleware: ['sidebase-auth'],
 })
+
+useHead({ title: 'Settings' })
+
+const { data: page } = await useAsyncData('settings', () =>
+  queryCollection('content').path('/settings').first())
 </script>
 
 <template>
@@ -12,9 +17,9 @@ definePageMeta({
         description="Configure SSH access used for remote command execution."
       />
       <UPageBody>
-        <div class="space-y-6">
-          <SshSettingsCard />
-        </div>
+        <ContentRenderer v-if="page" :value="page" />
+        <USeparator />
+        <SshSettingsCard />
       </UPageBody>
     </UPage>
   </UContainer>

@@ -14,7 +14,10 @@
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {
+    "@nuxt/content": "catalog:build",
     "@nuxt/ui": "catalog:frontend",
+    "@sidebase/nuxt-auth": "catalog:frontend",
+    "better-sqlite3": "catalog:",
     "ssh2": "catalog:frontend",
     "zod": "catalog:frontend"
   },
@@ -27,7 +30,6 @@
     "@nuxt/devtools": "catalog:build",
     "@nuxt/eslint": "catalog:build",
     "@pinia/nuxt": "catalog:build",
-    "@sidebase/nuxt-auth": "catalog:frontend",
     "@vite-pwa/nuxt": "catalog:build",
     "@vueuse/core": "catalog:frontend",
     "@vueuse/nuxt": "catalog:build",

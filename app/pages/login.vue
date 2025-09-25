@@ -6,6 +6,8 @@ definePageMeta({
     navigateAuthenticatedTo: '/',
   },
 })
+
+useHead({ title: 'Login' })
 </script>
 
 <template>

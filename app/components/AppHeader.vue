@@ -3,13 +3,17 @@ import type { NavigationMenuItem } from '@nuxt/ui'
 import { appName } from '~/constants'
 
 const route = useRoute()
+// Connection status indicator handled by SshConnectionStatus component
 
 const items = computed<NavigationMenuItem[]>(() => buildMenu(route.path))
+
+// connectionStatus logic extracted into SshConnectionStatus component
 
 function buildMenu(path: string): NavigationMenuItem[] {
   return [
     { label: 'Home', to: '/', icon: 'i-lucide-home', active: path === '/' },
     { label: 'Settings', to: '/settings', icon: 'i-lucide-settings', active: path.startsWith('/settings') },
+    { label: 'Help', to: '/help', icon: 'i-lucide-help-circle', active: path.startsWith('/help') },
   ]
 }
 </script>
@@ -23,8 +27,11 @@ function buildMenu(path: string): NavigationMenuItem[] {
     </template>
 
     <template #right>
-      <AppHeaderUser />
-      <UColorModeButton />
+      <div class="flex items-center gap-3">
+        <SshConnectionStatus />
+        <AppHeaderUser />
+        <UColorModeButton />
+      </div>
     </template>
 
     <UNavigationMenu :items="items" />

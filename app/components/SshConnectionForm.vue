@@ -1,9 +1,10 @@
 <script setup lang="ts">
 // Connection form: host/username & action buttons
-const ssh = useSshSettings()
-const { host, username, saving, testing, generating, hasKey } = ssh
+// Key generation logic extracted to SshGenerateKeyButton component
 
-const canGenerate = computed(() => !generating.value)
+const ssh = useSshSettings()
+const { host, username, saving, testing, hasKey } = ssh
+
 const canTest = computed(() => !testing.value && hasKey.value && host.value && username.value)
 const canSave = computed(() => !saving.value && host.value && username.value)
 </script>
@@ -25,10 +26,7 @@ const canSave = computed(() => !saving.value && host.value && username.value)
       <UButton color="neutral" variant="soft" :loading="testing" :disabled="!canTest" @click="ssh.test">
         Test Connection
       </UButton>
-      <UButton color="warning" variant="soft" :loading="generating" :disabled="!canGenerate" @click="ssh.generate(false)">
-        <span v-if="!hasKey">Generate Keypair</span>
-        <span v-else>Regenerate</span>
-      </UButton>
+      <SshGenerateKeyButton />
     </div>
   </div>
 </template>
