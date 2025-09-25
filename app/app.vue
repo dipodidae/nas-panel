@@ -14,5 +14,5 @@ useHead({
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
-  </UApp>E
+  </UApp>
 </template>
