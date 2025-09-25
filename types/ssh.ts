@@ -4,6 +4,8 @@ export interface SshSettingsInternal {
   username: string | null
   encryptedPrivateKey: string | null
   publicKey: string | null
+  // Key algorithm (e.g., rsa, ed25519). Optional for backward compatibility.
+  algorithm?: string | null
   createdAt: number | null
   updatedAt: number | null
 }

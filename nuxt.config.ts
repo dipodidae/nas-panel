@@ -56,6 +56,15 @@ export default defineNuxtConfig({
       crawlLinks: false,
       routes: ['/'],
     },
+    experimental: {
+      database: true,
+    },
+    database: {
+      default: {
+        connector: 'sqlite',
+        options: { name: 'db' }, // stored at .data/db.sqlite3
+      },
+    },
   },
 
   auth: {

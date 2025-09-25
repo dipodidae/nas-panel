@@ -29,6 +29,7 @@ export function useSshSettings() {
   // In theory the module can inject this automatically, but we are currently
   // seeing 401 "Missing Authorization header" responses, so we add it here.
   const { token } = useAuth() as any
+  const toast = useToast()
 
   function authHeaders(): Record<string, string> {
     if (token?.value)
@@ -66,9 +67,11 @@ export function useSshSettings() {
     sshState.saving = true
     try {
       await $fetch('/api/settings/ssh', { method: 'POST', body: { host: sshState.host, username: sshState.username }, headers: authHeaders() })
+      toast.add({ title: 'SSH settings saved', color: 'success', icon: 'i-lucide-check-circle' })
     }
     catch (e: any) {
       sshState.error = e?.message || 'Save failed'
+      toast.add({ title: sshState.error || 'Save failed', color: 'error', icon: 'i-lucide-x-circle' })
     }
     finally {
       sshState.saving = false
@@ -82,10 +85,12 @@ export function useSshSettings() {
       if (resp.ok) {
         sshState.publicKey = resp.publicKey
         sshState.hasKey = true
+        toast.add({ title: resp.publicKey ? (force ? 'SSH key regenerated' : 'SSH key generated') : 'SSH key generated', color: 'success', icon: 'i-lucide-key' })
       }
     }
     catch (e: any) {
       sshState.error = e?.message || 'Generate failed'
+      toast.add({ title: sshState.error || 'Generate failed', color: 'error', icon: 'i-lucide-x-circle' })
     }
     finally {
       sshState.generating = false
@@ -98,10 +103,27 @@ export function useSshSettings() {
       const resp = await $fetch<SshTestResponse>('/api/settings/ssh/test', { method: 'POST', headers: authHeaders() })
       if (resp.ok) {
         sshState.lastTest = { success: resp.success, message: resp.message, latencyMs: resp.latencyMs }
+        if (resp.success) {
+          toast.add({
+            title: 'SSH connection OK',
+            description: resp.message || (resp.latencyMs ? `${resp.latencyMs} ms` : ''),
+            color: 'success',
+            icon: 'i-lucide-plug',
+          })
+        }
+        else {
+          toast.add({
+            title: 'SSH connection failed',
+            description: resp.message,
+            color: 'error',
+            icon: 'i-lucide-plug-zap',
+          })
+        }
       }
     }
     catch (e: any) {
       sshState.error = e?.message || 'Test failed'
+      toast.add({ title: sshState.error || 'Test failed', color: 'error', icon: 'i-lucide-x-circle' })
     }
     finally {
       sshState.testing = false

@@ -14,6 +14,6 @@ export default defineEventHandler(async (event) => {
   const parsed = bodySchema.safeParse(body)
   if (!parsed.success)
     throw createError({ statusCode: 400, statusMessage: 'Invalid body' })
-  saveSshHostUser(parsed.data.host, parsed.data.username)
+  await saveSshHostUser(parsed.data.host, parsed.data.username)
   return { ok: true }
 })

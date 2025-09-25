@@ -1,7 +1,8 @@
 import { requireAuth } from '@@/server/utils/auth'
 import { getSshPublicSettings } from '@@/server/utils/sshSettings'
 
-export default defineEventHandler((event) => {
+export default defineEventHandler(async (event) => {
   requireAuth(event)
-  return { ok: true, settings: getSshPublicSettings() }
+  const settings = await getSshPublicSettings()
+  return { ok: true, settings }
 })

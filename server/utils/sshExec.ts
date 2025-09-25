@@ -12,8 +12,8 @@ interface ExecResultHandlers {
   onError: (err: Error) => void
 }
 
-export function execRemote(command: string, handlers: ExecResultHandlers) {
-  const cfg = getSshInternal()
+export async function execRemote(command: string, handlers: ExecResultHandlers) {
+  const cfg = await getSshInternal()
   if (!cfg.host || !cfg.username || !cfg.encryptedPrivateKey)
     throw new Error('SSH not configured')
   const privateKey = decryptPrivateKey(cfg.encryptedPrivateKey)
@@ -42,23 +42,18 @@ export function execRemote(command: string, handlers: ExecResultHandlers) {
   })
 }
 
-export function testRemoteConnection(): Promise<{ success: boolean, message: string, latencyMs?: number }> {
-  return new Promise((resolve) => {
+export async function testRemoteConnection(): Promise<{ success: boolean, message: string, latencyMs?: number }> {
+  return await new Promise((resolve) => {
     const start = Date.now()
-    try {
-      execRemote('echo ok', {
-        onStdout: () => {},
-        onStderr: () => {},
-        onExit: (code) => {
-          resolve({ success: code === 0, message: code === 0 ? 'ok' : `exit ${code}`, latencyMs: Date.now() - start })
-        },
-        onError: (err) => {
-          resolve({ success: false, message: err.message })
-        },
-      })
-    }
-    catch (e: any) {
-      resolve({ success: false, message: e.message })
-    }
+    void execRemote('echo ok', {
+      onStdout: () => {},
+      onStderr: () => {},
+      onExit: (code) => {
+        resolve({ success: code === 0, message: code === 0 ? 'ok' : `exit ${code}`, latencyMs: Date.now() - start })
+      },
+      onError: (err) => {
+        resolve({ success: false, message: err.message })
+      },
+    })
   })
 }

@@ -11,12 +11,12 @@ const canSave = computed(() => !saving.value && host.value && username.value)
 <template>
   <div>
     <div class="grid gap-4 sm:grid-cols-2">
-      <UFormGroup label="Host" required>
-        <UInput v-model="host" placeholder="example.com" />
-      </UFormGroup>
-      <UFormGroup label="Username" required>
-        <UInput v-model="username" placeholder="user" />
-      </UFormGroup>
+      <UFormField label="Host" name="host">
+        <UInput v-model="host" placeholder="example.com" class="w-full" size="xl" />
+      </UFormField>
+      <UFormField label="Username" name="username" required>
+        <UInput v-model="username" placeholder="user" class="w-full" size="xl" />
+      </UFormField>
     </div>
     <div class="mt-4 flex flex-wrap gap-2">
       <UButton :loading="saving" :disabled="!canSave" @click="ssh.save">

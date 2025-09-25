@@ -70,7 +70,7 @@ export function startCommand(key: string): CommandDefinition {
   const full = `${instance.command} ${instance.args.join(' ')}`.trim()
   recordProcessOutput(instance, 'meta', `START ${full}`)
   try {
-    execRemote(full, {
+    void execRemote(full, {
       onStdout: (data: string) => recordProcessOutput(instance, 'stdout', data),
       onStderr: (data: string) => recordProcessOutput(instance, 'stderr', data),
       onExit: (code: number | null) => {
