@@ -3,15 +3,18 @@
 This is a modern web application built with Nuxt 4, TypeScript, and Vue 3 Composition API.
 
 ## Core Requirements
+
 The end goal is stability, speed, and great user experience.
 
 ## Project Structure
+
 - `app/` - Application code (app.vue, components/, composables/, stores/, pages/)
 - `shared/` - Code shared between client/server
 - `server/` - Server-side code
 - `public/` - Static assets
 
 ## Code Quality Requirements
+
 - Follow standard TypeScript conventions and best practices
 - Use `<script setup lang="ts">` and Composition API when creating Vue components
 - Use clear, descriptive variable and function names
@@ -23,8 +26,9 @@ The end goal is stability, speed, and great user experience.
 - Favor tiny, focused components—especially inside loops—so logic lives in the script of a subcomponent, not buried in complex template expressions.
 
 ## Key Points
+
 - Components in `app/components/` are auto-imported
 - Composables in `app/composables/` are auto-imported
 - Create and maintain PROGRESS.md file to track ongoing work and issues
 - Keep application-specific code in the app/ folder
-- Type Organization: All shared/project-wide TypeScript types live under `/types` (command.ts, stream.ts, store.ts, api.ts, index.ts, global.d.ts). Do NOT redefine large shared interfaces inline in components/composables—only keep tiny component-local helper types adjacent. Always import from `@/types/...`.
+- Type Organization: All shared/project-wide TypeScript types live under `/types` (command.ts, stream.ts, store.ts, api.ts, index.ts, global.d.ts). Do NOT redefine large shared interfaces inline in components/composables—only keep tiny component-local helper types adjacent.

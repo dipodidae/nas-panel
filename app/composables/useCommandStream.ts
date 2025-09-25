@@ -54,7 +54,9 @@ function openSocket(path: string, store: ReturnType<typeof useCommandStore>) {
     : `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}${path}`
   ws = new WebSocket(url)
   state.status = 'connecting'
-  ws.onopen = () => { state.status = 'streaming' }
+  ws.onopen = () => {
+    state.status = 'streaming'
+  }
   ws.onmessage = (ev) => {
     const line = parseRaw(ev.data)
     if (!line)

@@ -1,5 +1,3 @@
-// Types (ListCommandsResponse, CommandMeta) are globally available
-
 interface CommandCatalogState {
   loaded: boolean
   commands: CommandMeta[]
@@ -17,7 +15,7 @@ export function useCommandCatalog() {
     if (state.loaded && !force)
       return
     try {
-  const resp = await $fetch<ListCommandsResponse>('/api/commands')
+      const resp = await $fetch<ListCommandsResponse>('/api/commands')
       if (resp.ok) {
         state.commands = resp.commands
         state.loaded = true
