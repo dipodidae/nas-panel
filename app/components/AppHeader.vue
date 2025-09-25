@@ -4,20 +4,14 @@ import { appName } from '~/constants'
 
 const route = useRoute()
 
-const items = computed<NavigationMenuItem[]>(() => [
-  {
-    label: 'Home',
-    to: '/',
-    icon: 'i-lucide-home',
-    active: route.path === '/',
-  },
-  {
-    label: 'Settings',
-    to: '/settings',
-    icon: 'i-lucide-settings',
-    active: route.path.startsWith('/settings'),
-  },
-])
+const items = computed<NavigationMenuItem[]>(() => buildMenu(route.path))
+
+function buildMenu(path: string): NavigationMenuItem[] {
+  return [
+    { label: 'Home', to: '/', icon: 'i-lucide-home', active: path === '/' },
+    { label: 'Settings', to: '/settings', icon: 'i-lucide-settings', active: path.startsWith('/settings') },
+  ]
+}
 </script>
 
 <template>

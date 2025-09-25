@@ -9,6 +9,5 @@ export default defineEventHandler((event) => {
   const inst = getCommand(id)
   if (!inst)
     throw createError({ statusCode: 404, statusMessage: 'Not found' })
-  const ok = cancelCommand(id)
-  return { ok }
+  return { ok: cancelCommand(id) }
 })

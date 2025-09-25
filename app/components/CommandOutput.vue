@@ -14,17 +14,19 @@ const {
 const store = useCommandStore()
 
 // Human readable status
-const statusLabel = computed(() => {
-  if (error.value)
+const statusLabel = computed(() => mapStatus(status.value, !!error.value))
+
+function mapStatus(s: string, hasError: boolean): string {
+  if (hasError)
     return 'Error'
-  switch (status.value) {
+  switch (s) {
     case 'idle': return 'Idle'
     case 'connecting': return 'Connecting'
     case 'streaming': return 'Running'
     case 'closed': return 'Closed'
-    default: return status.value
+    default: return s
   }
-})
+}
 </script>
 
 <template>

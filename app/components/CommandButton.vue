@@ -13,17 +13,21 @@ const props = withDefaults(defineProps<{
 const commandStore = useCommandStore()
 const showConfirm = ref(false)
 
+function triggerCommand() {
+  commandStore.trigger(props.command)
+}
+
 function run() {
   if (props.confirm) {
     showConfirm.value = true
     return
   }
-  commandStore.trigger(props.command)
+  triggerCommand()
 }
 
 function confirmRun() {
   showConfirm.value = false
-  commandStore.trigger(props.command)
+  triggerCommand()
 }
 
 function cancelRun() {

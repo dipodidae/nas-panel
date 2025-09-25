@@ -49,40 +49,59 @@ function normalize(o: any): ParsedLine | null {
 }
 
 function openSocket(path: string, store: ReturnType<typeof useCommandStore>) {
-  const url = (path.startsWith('ws://') || path.startsWith('wss://'))
-    ? path
-    : `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}${path}`
+  const url = resolveWsUrl(path)
   ws = new WebSocket(url)
   state.status = 'connecting'
   ws.onopen = () => {
     state.status = 'streaming'
   }
-  ws.onmessage = (ev) => {
-    const line = parseRaw(ev.data)
-    if (!line)
-      return
-    state.lines.push(line)
-    if (state.lines.length > MAX_CLIENT_BUFFER)
-      state.lines.splice(0, state.lines.length - MAX_CLIENT_BUFFER)
-    if (line.kind === 'meta' && line.text.startsWith('EXIT')) {
-      const parts = line.text.split(' ')
-      const code = Number.parseInt(parts[1] || '', 10)
-      if (!Number.isNaN(code))
-        state.exitCode = code
-      // record exit in store history
-      store.markExited(state.exitCode)
-    }
-  }
-  ws.onerror = () => {
-    if (state.status !== 'error') {
-      state.status = 'error'
-      state.error = 'Stream error'
-    }
-  }
+  ws.onmessage = ev => handleIncoming(ev.data, store)
+  ws.onerror = () => markStreamError('Stream error')
   ws.onclose = () => {
     if (state.status !== 'error')
       state.status = 'closed'
   }
+}
+
+function resolveWsUrl(path: string): string {
+  if (path.startsWith('ws://') || path.startsWith('wss://'))
+    return path
+  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:'
+  return `${proto}//${location.host}${path}`
+}
+
+function handleIncoming(raw: string, store: ReturnType<typeof useCommandStore>) {
+  const line = parseRaw(raw)
+  if (!line)
+    return
+  state.lines.push(line)
+  trimClientBuffer()
+  if (isExitLine(line))
+    handleExitMeta(line, store)
+}
+
+function trimClientBuffer() {
+  if (state.lines.length > MAX_CLIENT_BUFFER)
+    state.lines.splice(0, state.lines.length - MAX_CLIENT_BUFFER)
+}
+
+function isExitLine(line: ParsedLine): boolean {
+  return line.kind === 'meta' && line.text.startsWith('EXIT')
+}
+
+function handleExitMeta(line: ParsedLine, store: ReturnType<typeof useCommandStore>) {
+  const parts = line.text.split(' ')
+  const code = Number.parseInt(parts[1] || '', 10)
+  if (!Number.isNaN(code))
+    state.exitCode = code
+  store.markExited(state.exitCode)
+}
+
+function markStreamError(message: string) {
+  if (state.status === 'error')
+    return
+  state.status = 'error'
+  state.error = message
 }
 
 function disconnect() {
@@ -101,9 +120,7 @@ export function useCommandStream() {
   const { token } = useAuth() as any
 
   function authHeaders(): Record<string, string> {
-    if (token?.value)
-      return { Authorization: `Bearer ${token.value}` }
-    return {}
+    return token?.value ? { Authorization: `Bearer ${token.value}` } : {}
   }
 
   async function start(key: string) {
@@ -117,9 +134,10 @@ export function useCommandStream() {
       openSocket(resp.wsPath, store)
     }
     catch (e: any) {
-      store.setError(e?.message || 'Failed to start')
+      const msg = e?.message || 'Failed to start'
+      store.setError(msg)
       state.status = 'error'
-      state.error = e?.message || 'Failed to start'
+      state.error = msg
     }
   }
 

@@ -32,9 +32,19 @@ export function useSshSettings() {
   const toast = useToast()
 
   function authHeaders(): Record<string, string> {
-    if (token?.value)
-      return { Authorization: `Bearer ${token.value}` }
-    return {}
+    return token?.value ? { Authorization: `Bearer ${token.value}` } : {}
+  }
+
+  function setError(message: string) {
+    sshState.error = message
+  }
+
+  function handleFailureToast(message: string, base: string, icon = 'i-lucide-x-circle') {
+    toast.add({ title: message || base, color: 'error', icon })
+  }
+
+  function handleSuccessToast(title: string, icon: string, description?: string) {
+    toast.add({ title, description, color: 'success', icon })
   }
 
   async function load(force = false) {
@@ -43,20 +53,17 @@ export function useSshSettings() {
     sshState.loading = true
     try {
       const resp = await $fetch<{ ok: boolean, settings: SshSettingsPublic }>('/api/settings/ssh', { headers: authHeaders() })
-      if (resp.ok) {
-        const s = resp.settings
-        sshState.host = s.host || ''
-        sshState.username = s.username || ''
-        sshState.publicKey = s.publicKey
-        sshState.hasKey = s.hasKey
-        sshState.error = null
-      }
-      else {
-        sshState.error = 'Failed to load settings'
-      }
+      if (!resp.ok)
+        return setError('Failed to load settings')
+      const s = resp.settings
+      sshState.host = s.host || ''
+      sshState.username = s.username || ''
+      sshState.publicKey = s.publicKey
+      sshState.hasKey = s.hasKey
+      sshState.error = null
     }
     catch (e: any) {
-      sshState.error = e?.message || 'Failed to load settings'
+      setError(e?.message || 'Failed to load settings')
     }
     finally {
       sshState.loading = false
@@ -67,11 +74,12 @@ export function useSshSettings() {
     sshState.saving = true
     try {
       await $fetch('/api/settings/ssh', { method: 'POST', body: { host: sshState.host, username: sshState.username }, headers: authHeaders() })
-      toast.add({ title: 'SSH settings saved', color: 'success', icon: 'i-lucide-check-circle' })
+      handleSuccessToast('SSH settings saved', 'i-lucide-check-circle')
     }
     catch (e: any) {
-      sshState.error = e?.message || 'Save failed'
-      toast.add({ title: sshState.error || 'Save failed', color: 'error', icon: 'i-lucide-x-circle' })
+      const msg = e?.message || 'Save failed'
+      setError(msg)
+      handleFailureToast(msg, 'Save failed')
     }
     finally {
       sshState.saving = false
@@ -85,12 +93,13 @@ export function useSshSettings() {
       if (resp.ok) {
         sshState.publicKey = resp.publicKey
         sshState.hasKey = true
-        toast.add({ title: resp.publicKey ? (force ? 'SSH key regenerated' : 'SSH key generated') : 'SSH key generated', color: 'success', icon: 'i-lucide-key' })
+        handleSuccessToast(resp.publicKey ? (force ? 'SSH key regenerated' : 'SSH key generated') : 'SSH key generated', 'i-lucide-key')
       }
     }
     catch (e: any) {
-      sshState.error = e?.message || 'Generate failed'
-      toast.add({ title: sshState.error || 'Generate failed', color: 'error', icon: 'i-lucide-x-circle' })
+      const msg = e?.message || 'Generate failed'
+      setError(msg)
+      handleFailureToast(msg, 'Generate failed')
     }
     finally {
       sshState.generating = false
@@ -104,26 +113,17 @@ export function useSshSettings() {
       if (resp.ok) {
         sshState.lastTest = { success: resp.success, message: resp.message, latencyMs: resp.latencyMs }
         if (resp.success) {
-          toast.add({
-            title: 'SSH connection OK',
-            description: resp.message || (resp.latencyMs ? `${resp.latencyMs} ms` : ''),
-            color: 'success',
-            icon: 'i-lucide-plug',
-          })
+          handleSuccessToast('SSH connection OK', 'i-lucide-plug', resp.message || (resp.latencyMs ? `${resp.latencyMs} ms` : undefined))
         }
         else {
-          toast.add({
-            title: 'SSH connection failed',
-            description: resp.message,
-            color: 'error',
-            icon: 'i-lucide-plug-zap',
-          })
+          toast.add({ title: 'SSH connection failed', description: resp.message, color: 'error', icon: 'i-lucide-plug-zap' })
         }
       }
     }
     catch (e: any) {
-      sshState.error = e?.message || 'Test failed'
-      toast.add({ title: sshState.error || 'Test failed', color: 'error', icon: 'i-lucide-x-circle' })
+      const msg = e?.message || 'Test failed'
+      setError(msg)
+      handleFailureToast(msg, 'Test failed')
     }
     finally {
       sshState.testing = false

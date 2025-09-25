@@ -49,10 +49,20 @@ export function cancelCommand(id: string): boolean {
 }
 
 export function startCommand(key: string): CommandDefinition {
+  const def = resolveWhitelistedDefinition(key)
+  const instance = createInstance(key, def)
+  launchRemote(instance)
+  return instance
+}
+
+function resolveWhitelistedDefinition(key: string): WhitelistedCommandConfig {
   const def = COMMAND_WHITELIST[key]
   if (!def)
     throw new Error('Unknown command')
+  return def
+}
 
+function createInstance(key: string, def: WhitelistedCommandConfig): CommandDefinition {
   const id = randomUUID()
   const instance: CommandDefinition = {
     id,
@@ -66,38 +76,47 @@ export function startCommand(key: string): CommandDefinition {
     emitter: new EventEmitter(),
   }
   instances.set(id, instance)
+  return instance
+}
 
+function launchRemote(instance: CommandDefinition) {
   const full = `${instance.command} ${instance.args.join(' ')}`.trim()
   recordProcessOutput(instance, 'meta', `START ${full}`)
   try {
-    void execRemote(full, {
-      onStdout: (data: string) => recordProcessOutput(instance, 'stdout', data),
-      onStderr: (data: string) => recordProcessOutput(instance, 'stderr', data),
-      onExit: (code: number | null) => {
-        instance.status = 'exited'
-        instance.exitCode = code
-        recordProcessOutput(instance, 'meta', `EXIT ${code}`)
-      },
-      onError: (err: Error) => {
-        instance.status = 'error'
-        recordProcessOutput(instance, 'meta', `ERROR: ${err.message}`)
-      },
-    })
+    void execRemote(full, buildRemoteHandlers(instance))
   }
   catch (e: any) {
     instance.status = 'error'
     recordProcessOutput(instance, 'meta', `ERROR: ${e.message}`)
   }
+}
 
-  return instance
+function buildRemoteHandlers(instance: CommandDefinition) {
+  return {
+    onStdout: (data: string) => recordProcessOutput(instance, 'stdout', data),
+    onStderr: (data: string) => recordProcessOutput(instance, 'stderr', data),
+    onExit: (code: number | null) => {
+      instance.status = 'exited'
+      instance.exitCode = code
+      recordProcessOutput(instance, 'meta', `EXIT ${code}`)
+    },
+    onError: (err: Error) => {
+      instance.status = 'error'
+      recordProcessOutput(instance, 'meta', `ERROR: ${err.message}`)
+    },
+  }
 }
 
 function recordProcessOutput(instance: CommandDefinition, kind: 'stdout' | 'stderr' | 'meta', data: string) {
   const serialized = JSON.stringify({ t: Date.now(), kind, data })
   instance.buffer.push(serialized)
+  trimBuffer(instance)
+  instance.emitter.emit('data', serialized)
+}
+
+function trimBuffer(instance: CommandDefinition) {
   if (instance.buffer.length > COMMAND_BUFFER_MAX_LINES)
     instance.buffer.splice(0, instance.buffer.length - COMMAND_BUFFER_MAX_LINES)
-  instance.emitter.emit('data', serialized)
 }
 
 export function serializeInstance(inst: CommandDefinition): SerializedCommandInstance {

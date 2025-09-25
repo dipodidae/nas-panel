@@ -12,16 +12,14 @@ const exitClass = computed(() => {
   const code = props.item.exitCode
   if (code === 0)
     return 'text-green-500'
-
   if (code === null)
     return 'text-neutral-400'
-
   return 'text-red-500'
 })
 
 const timeString = computed(() => new Date(props.item.at).toLocaleTimeString())
 
-const exitClassContent = computed<string>(() => String(props.item.exitCode) ?? '—')
+const exitClassContent = computed<string>(() => props.item.exitCode === null ? '—' : String(props.item.exitCode))
 </script>
 
 <template>

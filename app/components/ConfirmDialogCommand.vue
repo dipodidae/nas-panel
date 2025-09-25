@@ -4,12 +4,8 @@ import ConfirmDialog from './ConfirmDialog.vue'
 const props = defineProps<{ command: string }>()
 const emit = defineEmits<{ (e: 'confirm'): void, (e: 'cancel'): void }>()
 const open = defineModel<boolean>('open', { required: true })
-function onConfirm() {
-  emit('confirm')
-}
-function onCancel() {
-  emit('cancel')
-}
+const onConfirm = () => emit('confirm')
+const onCancel = () => emit('cancel')
 </script>
 
 <template>

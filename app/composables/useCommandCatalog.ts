@@ -16,17 +16,19 @@ export function useCommandCatalog() {
       return
     try {
       const resp = await $fetch<ListCommandsResponse>('/api/commands')
-      if (resp.ok) {
-        state.commands = resp.commands
-        state.loaded = true
-        state.error = null
-        return
-      }
-      state.error = 'Failed to load commands'
+      if (!resp.ok)
+        return setError('Failed to load commands')
+      state.commands = resp.commands
+      state.loaded = true
+      state.error = null
     }
     catch (e: any) {
-      state.error = e?.message || 'Failed to load commands'
+      setError(e?.message || 'Failed to load commands')
     }
+  }
+
+  function setError(msg: string) {
+    state.error = msg
   }
 
   return { ...toRefs(state), load }

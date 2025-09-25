@@ -22,18 +22,24 @@ async function loadRow(): Promise<SshSettingsInternal> {
   const db = useDatabase()
   const result = await db.sql`SELECT * FROM ssh_settings WHERE id='singleton' LIMIT 1`
   const rows: any[] = (result as any)?.rows || []
-  if (rows.length === 0) {
-    return {
-      host: null,
-      username: null,
-      encryptedPrivateKey: null,
-      publicKey: null,
-      algorithm: null,
-      createdAt: null,
-      updatedAt: null,
-    }
+  if (rows.length === 0)
+    return emptySettings()
+  return mapRow(rows[0])
+}
+
+function emptySettings(): SshSettingsInternal {
+  return {
+    host: null,
+    username: null,
+    encryptedPrivateKey: null,
+    publicKey: null,
+    algorithm: null,
+    createdAt: null,
+    updatedAt: null,
   }
-  const r: any = rows[0]
+}
+
+function mapRow(r: any): SshSettingsInternal {
   return {
     host: r.host ?? null,
     username: r.username ?? null,
@@ -48,8 +54,17 @@ async function loadRow(): Promise<SshSettingsInternal> {
 async function saveRow(partial: Partial<SshSettingsInternal>) {
   await ensureTable()
   const existing = await loadRow()
+  const merged = mergeSettings(existing, partial)
+  const db = useDatabase()
+  await db.sql`INSERT INTO ssh_settings (id, host, username, encryptedPrivateKey, publicKey, algorithm, createdAt, updatedAt)
+    VALUES ('singleton', ${merged.host}, ${merged.username}, ${merged.encryptedPrivateKey}, ${merged.publicKey}, ${merged.algorithm}, ${merged.createdAt}, ${merged.updatedAt})
+    ON CONFLICT(id) DO UPDATE SET host=excluded.host, username=excluded.username, encryptedPrivateKey=excluded.encryptedPrivateKey, publicKey=excluded.publicKey, algorithm=excluded.algorithm, createdAt=excluded.createdAt, updatedAt=excluded.updatedAt`
+  return merged
+}
+
+function mergeSettings(existing: SshSettingsInternal, partial: Partial<SshSettingsInternal>): SshSettingsInternal {
   const now = Date.now()
-  const merged: SshSettingsInternal = {
+  return {
     host: partial.host !== undefined ? partial.host : existing.host,
     username: partial.username !== undefined ? partial.username : existing.username,
     encryptedPrivateKey: partial.encryptedPrivateKey !== undefined ? partial.encryptedPrivateKey : existing.encryptedPrivateKey,
@@ -58,11 +73,6 @@ async function saveRow(partial: Partial<SshSettingsInternal>) {
     createdAt: existing.createdAt || now,
     updatedAt: now,
   }
-  const db = useDatabase()
-  await db.sql`INSERT INTO ssh_settings (id, host, username, encryptedPrivateKey, publicKey, algorithm, createdAt, updatedAt)
-    VALUES ('singleton', ${merged.host}, ${merged.username}, ${merged.encryptedPrivateKey}, ${merged.publicKey}, ${merged.algorithm}, ${merged.createdAt}, ${merged.updatedAt})
-    ON CONFLICT(id) DO UPDATE SET host=excluded.host, username=excluded.username, encryptedPrivateKey=excluded.encryptedPrivateKey, publicKey=excluded.publicKey, algorithm=excluded.algorithm, createdAt=excluded.createdAt, updatedAt=excluded.updatedAt`
-  return merged
 }
 
 export async function getSshPublicSettings(): Promise<SshSettingsPublic> {
@@ -85,18 +95,26 @@ export async function generateSshKeypair(force = false): Promise<{ publicKey: st
   const had = !!current.encryptedPrivateKey
   if (had && !force)
     throw new Error('Key already exists (use force)')
-  const { publicKey, privateKey } = generateKeyPairSync('rsa', {
+  const { publicKey, privateKey } = generateRsaKeypair()
+  const pubLine = formatAuthorizedKeysLine(publicKey)
+  await saveRow({ publicKey: pubLine, encryptedPrivateKey: encryptPrivateKey(privateKey), algorithm: 'rsa' })
+  return { publicKey: pubLine, replaced: had }
+}
+
+function generateRsaKeypair() {
+  return generateKeyPairSync('rsa', {
     modulusLength: 2048,
     publicKeyEncoding: { type: 'pkcs1', format: 'pem' },
     privateKeyEncoding: { type: 'pkcs1', format: 'pem' },
   })
+}
+
+function formatAuthorizedKeysLine(publicKey: string): string {
   const body = publicKey
     .split('\n')
     .filter(l => l && !l.includes('BEGIN') && !l.includes('END'))
     .join('')
-  const pubLine = `ssh-rsa ${body}`
-  await saveRow({ publicKey: pubLine, encryptedPrivateKey: encryptPrivateKey(privateKey), algorithm: 'rsa' })
-  return { publicKey: pubLine, replaced: had }
+  return `ssh-rsa ${body}`
 }
 
 export async function getSshInternal(): Promise<SshSettingsInternal> {
