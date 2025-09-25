@@ -1,11 +1,11 @@
 // Uses global types from /types (CommandDefinition, SerializedCommandInstance, WhitelistedCommandConfig)
-import { spawn } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import { EventEmitter } from 'node:events'
 import { join } from 'node:path'
 import process from 'node:process'
 import { COMMAND_META } from '#shared/commandCatalog'
 import { COMMAND_BUFFER_MAX_LINES, COMMAND_ENV_HOME_FALLBACK } from './commandConstants'
+import { execRemote } from './sshExec'
 
 // Whitelisted commands (execution mapping). Keep in sync with front-end catalog but do NOT expose
 // sensitive args in catalog if that ever becomes a concern.
@@ -67,26 +67,27 @@ export function startCommand(key: string): CommandDefinition {
   }
   instances.set(id, instance)
 
-  const child = spawn(instance.command, instance.args, {
-    cwd: instance.cwd,
-    env: process.env,
-    shell: false,
-  })
-  instance.proc = child
-
-  child.stdout.on('data', d => recordProcessOutput(instance, 'stdout', d.toString()))
-  child.stderr.on('data', d => recordProcessOutput(instance, 'stderr', d.toString()))
-  child.on('error', (err) => {
+  const full = `${instance.command} ${instance.args.join(' ')}`.trim()
+  recordProcessOutput(instance, 'meta', `START ${full}`)
+  try {
+    execRemote(full, {
+      onStdout: (data: string) => recordProcessOutput(instance, 'stdout', data),
+      onStderr: (data: string) => recordProcessOutput(instance, 'stderr', data),
+      onExit: (code: number | null) => {
+        instance.status = 'exited'
+        instance.exitCode = code
+        recordProcessOutput(instance, 'meta', `EXIT ${code}`)
+      },
+      onError: (err: Error) => {
+        instance.status = 'error'
+        recordProcessOutput(instance, 'meta', `ERROR: ${err.message}`)
+      },
+    })
+  }
+  catch (e: any) {
     instance.status = 'error'
-    recordProcessOutput(instance, 'meta', `ERROR: ${err.message}`)
-  })
-  child.on('close', (code) => {
-    instance.status = 'exited'
-    instance.exitCode = code
-    recordProcessOutput(instance, 'meta', `EXIT ${code}`)
-  })
-
-  recordProcessOutput(instance, 'meta', `START ${instance.command} ${instance.args.join(' ')} (cwd=${instance.cwd})`)
+    recordProcessOutput(instance, 'meta', `ERROR: ${e.message}`)
+  }
 
   return instance
 }

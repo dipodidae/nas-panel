@@ -1,0 +1,37 @@
+<script setup lang="ts">
+// Connection form: host/username & action buttons
+const ssh = useSshSettings()
+const { host, username, saving, testing, generating, hasKey } = ssh
+
+const canGenerate = computed(() => !generating.value)
+const canTest = computed(() => !testing.value && hasKey.value && host.value && username.value)
+const canSave = computed(() => !saving.value && host.value && username.value)
+</script>
+
+<template>
+  <div>
+    <div class="grid gap-4 sm:grid-cols-2">
+      <UFormGroup label="Host" required>
+        <UInput v-model="host" placeholder="example.com" />
+      </UFormGroup>
+      <UFormGroup label="Username" required>
+        <UInput v-model="username" placeholder="user" />
+      </UFormGroup>
+    </div>
+    <div class="mt-4 flex flex-wrap gap-2">
+      <UButton :loading="saving" :disabled="!canSave" @click="ssh.save">
+        Save
+      </UButton>
+      <UButton color="neutral" variant="soft" :loading="testing" :disabled="!canTest" @click="ssh.test">
+        Test Connection
+      </UButton>
+      <UButton color="warning" variant="soft" :loading="generating" :disabled="!canGenerate" @click="ssh.generate(false)">
+        <span v-if="!hasKey">Generate Keypair</span>
+        <span v-else>Regenerate</span>
+      </UButton>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+</style>

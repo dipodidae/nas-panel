@@ -30,4 +30,11 @@ declare global {
   type ListCommandsResponse = import('./api').ListCommandsResponse
   type StartCommandResponse = import('./api').StartCommandResponse
   type GenericOkResponse = import('./api').GenericOkResponse
+
+  // SSH
+  type SshSettingsInternal = import('./ssh').SshSettingsInternal
+  type SshSettingsPublic = import('./ssh').SshSettingsPublic
+  type SshGenerateResponse = import('./ssh').SshGenerateResponse
+  type SshSaveSettingsBody = import('./ssh').SshSaveSettingsBody
+  type SshTestResponse = import('./ssh').SshTestResponse
 }

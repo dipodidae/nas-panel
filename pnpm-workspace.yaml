@@ -1,8 +1,6 @@
 packages:
   - .
 
-catalog: {}
-
 catalogs:
   build:
     '@commitlint/cli': ^19.8.1
@@ -31,6 +29,7 @@ catalogs:
     '@vueuse/core': ^13.9.0
     next-auth: ~4.24.11
     pinia: ^3.0.3
+    ssh2: 1.15.0
     vue: ^3.5.22
     zod: ^4.1.11
   icons:
@@ -40,7 +39,9 @@ catalogs:
 onlyBuiltDependencies:
   - '@parcel/watcher'
   - '@tailwindcss/oxide'
+  - cpu-features
   - esbuild
   - simple-git-hooks
+  - ssh2
   - unrs-resolver
   - vue-demi

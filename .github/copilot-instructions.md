@@ -1,6 +1,6 @@
 # Nuxt 4 TypeScript Project
 
-This is a modern web application built with Nuxt 4, TypeScript, and Vue 3 Composition API.
+This is a modern web application built with Nuxt 4, Nuxt UI Pro, Pinia, TypeScript, and Vue 3 Composition API.
 
 ## Core Requirements
 
@@ -22,6 +22,7 @@ The end goal is stability, speed, and great user experience.
 - Keep functions focused and manageable (generally under 50 lines), extract complex logic into separate domain-specific files
 - Remove code that is not used or needed
 - Use error handling patterns consistently
+- Always use Nuxt UI Pro components for UI elements, favoring them over other libraries or custom components unless there is a strong reason otherwise
 - Use auto-imported components and composables wherever possible to maintain clean and consistent code
 - Favor tiny, focused components—especially inside loops—so logic lives in the script of a subcomponent, not buried in complex template expressions.
 
