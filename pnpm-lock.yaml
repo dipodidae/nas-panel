@@ -27,6 +27,10 @@ catalogs:
     '@vueuse/nuxt':
       specifier: ^13.9.0
       version: 13.9.0
+  default:
+    better-sqlite3:
+      specifier: ^12.4.1
+      version: 12.4.1
   dev:
     '@antfu/eslint-config':
       specifier: ^5.4.1
@@ -106,7 +110,7 @@ importers:
         specifier: catalog:frontend
         version: 1.1.0(better-sqlite3@12.4.1)(magicast@0.3.5)(next-auth@4.24.11)
       better-sqlite3:
-        specifier: ^12.4.1
+        specifier: 'catalog:'
         version: 12.4.1
       ssh2:
         specifier: catalog:frontend

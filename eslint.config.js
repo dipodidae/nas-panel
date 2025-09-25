@@ -1,6 +1,7 @@
 // @ts-check
 import antfu from '@antfu/eslint-config'
 import tailwindcss from 'eslint-plugin-tailwindcss'
+// IMPORTANT: Ensure `.nuxt/eslint.config.mjs` exists by running `nuxt prepare` (handled in lint script & CI)
 import nuxt from './.nuxt/eslint.config.mjs'
 
 export default antfu(

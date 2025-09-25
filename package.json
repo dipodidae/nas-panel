@@ -10,7 +10,8 @@
     "preview": "nuxt preview",
     "start": "node .output/server/index.mjs",
     "start:generate": "npx serve .output/public",
-    "lint": "eslint .",
+    "prepare:eslint": "nuxt prepare",
+    "lint": "pnpm run prepare:eslint && eslint .",
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {
