@@ -95,28 +95,21 @@ function disconnect() {
     state.status = 'closed'
 }
 
-async function cancelActive() {
-  if (!state.activeId || state.status !== 'streaming' || state.cancelling)
-    return
-  state.cancelling = true
-  try {
-    await $fetch(`/api/commands/${state.activeId}`, { method: 'DELETE' })
-  }
-  catch (e: any) {
-    state.error = e?.message || 'Cancel failed'
-  }
-  finally {
-    state.cancelling = false
-  }
-}
-
 export function useCommandStream() {
   const store = useCommandStore()
+  // Auth token for protected command endpoints
+  const { token } = useAuth() as any
+
+  function authHeaders(): Record<string, string> {
+    if (token?.value)
+      return { Authorization: `Bearer ${token.value}` }
+    return {}
+  }
 
   async function start(key: string) {
     try {
       state.status = 'connecting'
-      const resp = await $fetch<{ ok: boolean, command: { id: string }, wsPath: string }>(`/api/commands/${key}`, { method: 'POST' })
+      const resp = await $fetch<{ ok: boolean, command: { id: string }, wsPath: string }>(`/api/commands/${key}`, { method: 'POST', headers: authHeaders() })
       if (!resp.ok)
         throw new Error('Failed to start command')
       store.markStarted(resp.command.id)
@@ -153,6 +146,21 @@ export function useCommandStream() {
 
   function toggleFollow() {
     state.follow = !state.follow
+  }
+
+  async function cancelActive() {
+    if (!state.activeId || state.status !== 'streaming' || state.cancelling)
+      return
+    state.cancelling = true
+    try {
+      await $fetch(`/api/commands/${state.activeId}`, { method: 'DELETE', headers: authHeaders() })
+    }
+    catch (e: any) {
+      state.error = e?.message || 'Cancel failed'
+    }
+    finally {
+      state.cancelling = false
+    }
   }
 
   return {

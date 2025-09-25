@@ -32,6 +32,3 @@ const canSave = computed(() => !saving.value && host.value && username.value)
     </div>
   </div>
 </template>
-
-<style scoped>
-</style>

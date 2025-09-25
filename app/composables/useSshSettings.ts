@@ -25,12 +25,23 @@ const sshState = reactive<SshSettingsState>({
 })
 
 export function useSshSettings() {
+  // Pull auth token (sidebase/nuxt-auth) so we can attach it explicitly.
+  // In theory the module can inject this automatically, but we are currently
+  // seeing 401 "Missing Authorization header" responses, so we add it here.
+  const { token } = useAuth() as any
+
+  function authHeaders(): Record<string, string> {
+    if (token?.value)
+      return { Authorization: `Bearer ${token.value}` }
+    return {}
+  }
+
   async function load(force = false) {
     if (sshState.loading && !force)
       return
     sshState.loading = true
     try {
-      const resp = await $fetch<{ ok: boolean, settings: SshSettingsPublic }>('/api/settings/ssh')
+      const resp = await $fetch<{ ok: boolean, settings: SshSettingsPublic }>('/api/settings/ssh', { headers: authHeaders() })
       if (resp.ok) {
         const s = resp.settings
         sshState.host = s.host || ''
@@ -54,7 +65,7 @@ export function useSshSettings() {
   async function save() {
     sshState.saving = true
     try {
-      await $fetch('/api/settings/ssh', { method: 'POST', body: { host: sshState.host, username: sshState.username } })
+      await $fetch('/api/settings/ssh', { method: 'POST', body: { host: sshState.host, username: sshState.username }, headers: authHeaders() })
     }
     catch (e: any) {
       sshState.error = e?.message || 'Save failed'
@@ -67,7 +78,7 @@ export function useSshSettings() {
   async function generate(force = false) {
     sshState.generating = true
     try {
-      const resp = await $fetch<SshGenerateResponse>(`/api/settings/ssh/key${force ? '?force=1' : ''}`, { method: 'POST' })
+      const resp = await $fetch<SshGenerateResponse>(`/api/settings/ssh/key${force ? '?force=1' : ''}`, { method: 'POST', headers: authHeaders() })
       if (resp.ok) {
         sshState.publicKey = resp.publicKey
         sshState.hasKey = true
@@ -84,7 +95,7 @@ export function useSshSettings() {
   async function test() {
     sshState.testing = true
     try {
-      const resp = await $fetch<SshTestResponse>('/api/settings/ssh/test', { method: 'POST' })
+      const resp = await $fetch<SshTestResponse>('/api/settings/ssh/test', { method: 'POST', headers: authHeaders() })
       if (resp.ok) {
         sshState.lastTest = { success: resp.success, message: resp.message, latencyMs: resp.latencyMs }
       }

@@ -27,11 +27,62 @@ const schema = z.object({
 
 type Schema = z.output<typeof schema>
 
+// Latest credentials captured just before execute; doesn't need to be reactive
+let pendingCredentials: { username: string, password: string } | null = null
+
+function extractErrorMessage(err: any): string {
+  if (!err)
+    return 'Unknown error'
+  // nuxt-auth / next-auth style error object sometimes is string
+  if (typeof err === 'string')
+    return err
+  if (err?.error && typeof err.error === 'string')
+    return err.error
+  if (err?.data?.statusMessage)
+    return err.data.statusMessage
+  if (err?.data?.message)
+    return err.data.message
+  if (err?.statusMessage)
+    return err.statusMessage
+  if (typeof err.message === 'string')
+    return err.message
+  return 'Authentication failed'
+}
+
+// useAsyncData with manual execution: no request until user submits
+const { data: loginResponse, error: loginFetchError, status, execute, clear } = await useAsyncData(
+  'auth-login',
+  async () => {
+    if (!pendingCredentials)
+      throw new Error('Missing credentials')
+
+    return await signIn({
+      username: pendingCredentials.username,
+      password: pendingCredentials.password,
+    }, { callbackUrl: '/', redirect: false })
+  },
+  { immediate: false },
+)
+
+const loading = computed(() => status.value === 'pending')
+const loginErrorMessage = computed(() => loginFetchError.value ? extractErrorMessage(loginFetchError.value) : null)
+
+// Redirect when successful
+watchEffect(async () => {
+  if (status.value === 'success' && loginResponse.value && !loginFetchError.value) {
+    const url = (loginResponse.value as any)?.url || '/'
+    await navigateTo(url)
+  }
+})
+
 async function login(payload: FormSubmitEvent<Schema>) {
-  await signIn({
+  // Reset previous state
+  clear()
+  pendingCredentials = {
     username: payload.data.username.trim(),
     password: payload.data.password,
-  }, { callbackUrl: '/' })
+  }
+  await execute()
 }
 </script>
 
@@ -39,6 +90,18 @@ async function login(payload: FormSubmitEvent<Schema>) {
   <UAuthForm
     :fields="fields"
     :schema="schema"
+    :loading="loading"
+    title="Login"
+    description="Enter your credentials to access your account."
     @submit="login"
-  />
+  >
+    <template #validation>
+      <UAlert
+        v-if="loginErrorMessage"
+        color="error"
+        icon="i-lucide-info"
+        :title="loginErrorMessage"
+      />
+    </template>
+  </UAuthForm>
 </template>

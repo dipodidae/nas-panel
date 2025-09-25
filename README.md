@@ -67,7 +67,16 @@ Runtime configuration is managed through environment variables:
 NUXT_AUTH_SECRET=your-secret-key
 NUXT_AUTH_ADMIN_USERNAME=admin
 NUXT_AUTH_ADMIN_PASSWORD=password
+
+# Required for SSH key generation & encryption (min 32 chars)
+NUXT_SSH_PRIVATE_KEY_SECRET=32+_character_random_string_here________________
 ```
+
+Notes:
+
+- `NUXT_SSH_PRIVATE_KEY_SECRET` is used to symmetrically encrypt the generated SSH private key at rest (AES-256-GCM). If it is missing or shorter than 32 characters, keypair generation will fail with: `NUXT_SSH_PRIVATE_KEY_SECRET missing or too short (min 32 chars)`.
+- In production, generate a high-entropy value (e.g. from a password manager or `openssl rand -base64 48`).
+- Changing the secret after keys are generated invalidates the stored encrypted private key (you would need to force-regenerate the keypair).
 
 All configuration values are server-side only and not exposed to the client.
 

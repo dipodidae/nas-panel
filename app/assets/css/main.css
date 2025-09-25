@@ -1,2 +1,52 @@
 @import 'tailwindcss';
-@import '@nuxt/ui-pro';
+@import '@nuxt/ui';
+
+@theme {
+  --font-sans:
+    'Atkinson Hyperlegible', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  /* Example custom palette (commented out) – define all shades 50-950 if enabled
+  --color-brand-50: #f5fbff;
+  --color-brand-100: #e2f5ff;
+  --color-brand-200: #bfe9ff;
+  --color-brand-300: #89d8ff;
+  --color-brand-400: #46c2ff;
+  --color-brand-500: #12a6f2;
+  --color-brand-600: #0589cf;
+  --color-brand-700: #056fa7;
+  --color-brand-800: #075a86;
+  --color-brand-900: #0c4b70;
+  --color-brand-950: #072f48;
+  */
+}
+
+/* Light mode semantic variables */
+:root {
+  --ui-bg: var(--color-neutral-50);
+  --ui-bg-muted: var(--ui-color-neutral-50);
+  --ui-bg-elevated: var(--ui-color-neutral-100);
+  --ui-bg-accented: var(--ui-color-neutral-200);
+  --ui-bg-inverted: var(--ui-color-neutral-900);
+
+  --ui-border: var(--ui-color-neutral-200);
+  --ui-border-muted: var(--ui-color-neutral-200);
+  --ui-border-accented: var(--ui-color-neutral-300);
+  --ui-border-inverted: var(--ui-color-neutral-900);
+
+  --ui-radius: 0.25em;
+  --ui-header-height: --spacing(22);
+}
+
+/* Dark mode semantic variables */
+.dark {
+  --ui-bg: var(--ui-color-neutral-950);
+  --ui-bg-muted: var(--ui-color-neutral-800);
+  --ui-bg-elevated: var(--ui-color-neutral-800);
+  --ui-bg-accented: var(--ui-color-neutral-700);
+  --ui-bg-inverted: var(--color-white);
+
+  --ui-border: var(--ui-color-neutral-800);
+  --ui-border-muted: var(--ui-color-neutral-700);
+  --ui-border-accented: var(--ui-color-neutral-700);
+  --ui-border-inverted: var(--color-white);
+}

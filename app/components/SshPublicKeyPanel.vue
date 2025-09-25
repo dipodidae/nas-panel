@@ -26,6 +26,3 @@ const { publicKey, hasKey } = ssh
     </div>
   </div>
 </template>
-
-<style scoped>
-</style>

@@ -14,7 +14,7 @@
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {
-    "@nuxt/ui-pro": "catalog:frontend",
+    "@nuxt/ui": "catalog:frontend",
     "ssh2": "catalog:frontend",
     "zod": "catalog:frontend"
   },
