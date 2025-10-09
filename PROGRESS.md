@@ -29,10 +29,35 @@ Date: 2025-09-25
 
 - Replaced default `<NuxtLoadingIndicator>` with custom `<AppLoadingIndicator>` using Tailwind + project CSS vars (gradient aligns with semantic `--ui-*` colors, Nuxt page lifecycle hooks, throttle/hide/reset timings configurable). Exposes manual control via DOM events & component expose.
 
-### Enhancements (Third Pass - Reliability & Force Kill)
+### Architectural Consolidation (Unified WebSocket)
 
-- Force kill (SIGKILL) support via `DELETE /api/commands/:id?force=1` and `forceKillCommand`.
-- Graceful cancel schedules auto force kill after 7s (see `COMMAND_CANCEL_FORCE_TIMEOUT`).
-- Retry & reconnect (up to 3 attempts, exponential backoff) for transient WebSocket disconnects.
-- Synthetic meta lines emitted client-side for reconnect attempts/errors for transparency.
-- UI additions: force kill button, reconnect status indicator.
+- Removed per-command WebSocket endpoint (`/api/ws/command/:id`).
+- Removed REST start endpoint (`POST /api/commands/:command`) and associated `StartCommandResponse` / `wsPath` shape.
+- Client (`useCommandStream`) now always uses single persistent `/api/ws/command` socket.
+- Legacy runtime flag `wsUnified` dropped; unified path is canonical.
+- Removed REST cancel fallback; cancel now exclusively via `{ action: 'cancel' }` WS message.
+- Pruned unused types (StartCommandResponse) and config flag, cleaned global type aliases.
+- Added meta dispatcher (ASSIGNED, START ERROR, CANCEL REQUESTED/FAILED) before buffering lines.
+- Simplified auth: query token only (Bearer prefix stripped if present).
+- Updated constants: removed `COMMAND_WS_BASE_PATH` (fixed path, no variants needed).
+- Reduced surface area for race conditions & handshake failures.
+
+### Admin Credentials (DB Seed + Management) - 2025-09-26
+
+- Added SQLite-backed `users` table with automatic schema init in `server/plugins/db-init.ts`.
+- Seeds default admin credentials (`admin` / `admin`) only if DB empty; flagged with `is_default`.
+- Replaced env-based credential check with DB lookup & SHA-256 hashed password.
+- New auth endpoints: `GET /api/auth/credentials` (status) & `PUT /api/auth/credentials` (update & clear default flag).
+- Added composable `useAdminCredentials` for reactive status + update.
+- UI components: `DefaultCredentialsWarning` (global banner) and `AdminCredentialsForm` (update credentials) integrated into settings page & default layout.
+- Warning auto-dismisses after credentials updated; persists across pages until resolved.
+- Removed requirement to set admin credentials in `.env`, DB file remains gitignored.
+- Follow-up: add password strength validation & optional forced change at first login.
+
+### Auth Hardening (Signed Tokens) - 2025-09-26
+
+- Implemented HMAC-SHA256 signed tokens (format: base64(payload).hex(hmac)).
+- Backward compatible: legacy unsigned tokens accepted until clients refresh.
+- Warning logged (console.warn) if `authSecret` unset; unsigned tokens issued in that case.
+- Added timing-safe signature verification.
+- Payload version field `v:1` included for future migrations.

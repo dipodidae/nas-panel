@@ -11,26 +11,6 @@ declare global {
     __NAS_PANEL_VERSION__?: string
   }
 
-  // Core command & process domain
-  type CommandRuntimeStatus = import('./command').CommandRuntimeStatus
-  type CommandMeta = import('./command').CommandMeta
-  type WhitelistedCommandConfig = import('./command').WhitelistedCommandConfig
-  type CommandDefinition = import('./command').CommandDefinition
-  type SerializedCommandInstance = import('./command').SerializedCommandInstance
-  type CommandHistoryEntry = import('./command').CommandHistoryEntry
-
-  // Stream / view state
-  type ParsedLine = import('./stream').ParsedLine
-  type CommandStreamState = import('./stream').CommandStreamState
-
-  // Store state
-  type CommandState = import('./store').CommandState
-
-  // API shapes
-  type ListCommandsResponse = import('./api').ListCommandsResponse
-  type StartCommandResponse = import('./api').StartCommandResponse
-  type GenericOkResponse = import('./api').GenericOkResponse
-
   // SSH
   type SshSettingsInternal = import('./ssh').SshSettingsInternal
   type SshSettingsPublic = import('./ssh').SshSettingsPublic

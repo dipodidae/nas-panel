@@ -11,7 +11,7 @@
     "start": "node .output/server/index.mjs",
     "start:generate": "npx serve .output/public",
     "prepare:eslint": "nuxt prepare",
-    "lint": "pnpm run prepare:eslint && eslint .",
+    "lint": "eslint",
     "typecheck": "nuxt typecheck",
     "postinstall": "nuxt prepare"
   },
